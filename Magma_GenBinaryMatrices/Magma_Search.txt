@@ -1,0 +1,962 @@
+F2 := GF(2);
+
+I := Matrix(F2,\
+	[
+		[1, 0, 0, 0, 0, 0, 0, 0],\
+		[0, 1, 0, 0, 0, 0, 0, 0],\
+		[0, 0, 1, 0, 0, 0, 0, 0],\
+		[0, 0, 0, 1, 0, 0, 0, 0],\
+		[0, 0, 0, 0, 1, 0, 0, 0],\
+		[0, 0, 0, 0, 0, 1, 0, 0],\
+		[0, 0, 0, 0, 0, 0, 1, 0],\
+		[0, 0, 0, 0, 0, 0, 0, 1]\
+	]\
+);
+
+O := Matrix(F2,\
+	[
+		[0, 0, 0, 0, 0, 0, 0, 0],\
+		[0, 0, 0, 0, 0, 0, 0, 0],\
+		[0, 0, 0, 0, 0, 0, 0, 0],\
+		[0, 0, 0, 0, 0, 0, 0, 0],\
+		[0, 0, 0, 0, 0, 0, 0, 0],\
+		[0, 0, 0, 0, 0, 0, 0, 0],\
+		[0, 0, 0, 0, 0, 0, 0, 0],\
+		[0, 0, 0, 0, 0, 0, 0, 0]\
+	]\
+);
+
+
+
+A := Matrix(F2,\
+	[
+		[0, 0, 0, 0, 0, 0, 0, 1],\
+		[1, 0, 0, 0, 0, 0, 0, 0],\
+		[0, 1, 0, 0, 0, 0, 0, 1],\
+		[0, 0, 1, 0, 0, 0, 0, 0],\
+		[0, 0, 0, 1, 0, 0, 0, 0],\
+		[0, 0, 0, 0, 1, 0, 0, 0],\
+		[0, 0, 0, 0, 0, 1, 0, 0],\
+		[0, 0, 0, 0, 0, 0, 1, 0]\
+	]\
+);
+
+
+testM2 := function(M)
+	rowSet := Subsets({1,2,3,4}, 2);
+	colSet := Subsets({1,2,3,4}, 2);
+
+	for iv in rowSet do
+		for jv in colSet do
+			ivs := SetToSequence(iv);
+			jvs := SetToSequence(jv);
+			r1 := HorizontalJoin([Submatrix(M, (ivs[1]-1)*8+1, (jvs[1]-1)*8+1, 8,8), Submatrix(M, (ivs[1]-1)*8+1, (jvs[2]-1)*8+1, 8,8)]);
+			r2 := HorizontalJoin([Submatrix(M, (ivs[2]-1)*8+1, (jvs[1]-1)*8+1, 8,8), Submatrix(M, (ivs[2]-1)*8+1, (jvs[2]-1)*8+1, 8,8)]);
+			subM := VerticalJoin([r1, r2]);
+			
+			//print(subM);
+			//print(Determinant(subM));
+			
+			if Determinant(subM) eq 0 then
+				return false;
+			end if;
+		end for;
+	end for;
+
+	return true;
+
+end function;
+
+
+testM3 := function(M)
+	rowSet := Subsets({1,2,3,4}, 3);
+	colSet := Subsets({1,2,3,4}, 3);
+
+	for iv in rowSet do
+		for jv in colSet do
+			ivs := SetToSequence(iv);
+			jvs := SetToSequence(jv);
+			
+			r1 := HorizontalJoin([Submatrix(M, (ivs[1]-1)*8+1, (jvs[1]-1)*8+1, 8,8), \
+								  Submatrix(M, (ivs[1]-1)*8+1, (jvs[2]-1)*8+1, 8,8), \
+								  Submatrix(M, (ivs[1]-1)*8+1, (jvs[3]-1)*8+1, 8,8)]);
+								  
+			r2 := HorizontalJoin([Submatrix(M, (ivs[2]-1)*8+1, (jvs[1]-1)*8+1, 8,8), \
+								  Submatrix(M, (ivs[2]-1)*8+1, (jvs[2]-1)*8+1, 8,8), \
+								  Submatrix(M, (ivs[2]-1)*8+1, (jvs[3]-1)*8+1, 8,8)]);
+								  
+			r3 := HorizontalJoin([Submatrix(M, (ivs[3]-1)*8+1, (jvs[1]-1)*8+1, 8,8), \
+								  Submatrix(M, (ivs[3]-1)*8+1, (jvs[2]-1)*8+1, 8,8), \
+								  Submatrix(M, (ivs[3]-1)*8+1, (jvs[3]-1)*8+1, 8,8)]);
+								  					  
+			subM := VerticalJoin([r1, r2, r3]);
+			
+			//print(subM);
+			//print(Determinant(subM));
+			
+			if Determinant(subM) eq 0 then
+				return false;
+			end if;
+		end for;
+	end for;
+
+	return true;
+
+end function;
+
+IsMDS_Branch5 := function(M)
+	return (testM2(M) and testM3(M) and (Determinant(M) ne 0));
+end function;
+
+HW := function(M)
+	w := 0;
+	for i in [1..32] do
+		for j in [1..32] do
+			if M[i][j] ne F2!0 then
+				w := w + 1;
+			end if;
+		end for;
+	end for;
+	return w;
+end function;
+
+
+Depth3 := function(M)
+	for i in [1..32] do
+		w := 0;
+		for j in [1..32] do
+			if M[i][j] ne F2!0 then
+				w := w + 1;
+			end if;
+		end for;
+		print(w);
+		if w gt 8 then
+			return false;
+		end if;
+	end for;
+	
+	return true;
+end function;
+
+
+eM := function(e12, e13, e14, r, s, t)
+	r1 := HorizontalJoin([          I,      A^e12,         A^e13,      A^e14]);
+	r2 := HorizontalJoin([A^(e12+s+t),          I,     A^(e14+s),  A^(e13+t)]);
+	r3 := HorizontalJoin([A^(e13+r+t),  A^(e14+r),             I,  A^(e12+t)]);
+	r4 := HorizontalJoin([A^(e14+r+s),  A^(e13+r),     A^(e12+s),          I]);
+
+	return VerticalJoin([r1, r2, r3, r4]);
+end function;
+
+
+IsCondition2 := function(e12, e13, e14, r, s, t)
+	return ((A^(2*e12-r) + A^(2*e13-s) + A^(2*e14-t)) eq O);
+end function;
+
+IsCondition1 := function(e12, e13, e14, r, s, t)
+	return (e12 in [-15..15]) and (e13 in [-15..15]) and (e14 in [-15..15]) and \
+	       ((e12+s+t) in [-6..6]) and ((e14+s) in [-6..6]) and ((e13+t) in [-15..15]) and \
+               ((e13+r+t) in [-6..6]) and ((e14+r) in [-6..6]) and ((e12+t) in [-6..6]) and \
+               ((e14+r+s) in [-6..6]) and ((e13+r) in [-6..6]) and ((e12+s) in [-6..6]);
+end function;
+
+
+
+
+
+GenLogFile := function(weight)
+count := 0;
+l := [];
+PrintFile(IntegerToString(weight) cat ".txt", "1000");
+for r in [0..8] do
+	for s in [r..8] do
+		for t in [s..8] do
+			for e12 in [-8..8] do
+				for e13 in [-8..8] do
+					for e14 in [-8..8] do
+						if IsCondition2(e12, e13, e14, r, s, t)\
+						   and (HW(eM(e12, e13, e14, r, s, t)) eq weight)\
+						   and ((2*e12+s+t) ne 0) and ((2*e13+r+t) ne 0) and ((2*e14+r+s) ne 0) and IsMDS_Branch5(eM(e12, e13, e14, r, s, t))\
+						   then
+							if [e12, e13, e14, r, s, t] notin l then
+								Append(~l, [e12, e13, e14, r, s, t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+							
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12, e13, e14, r, s, t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12, e13, e14, r, s, t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12, e13, e14, r, s, t));
+							end if;
+							if [e12, e14, e13, r, t, s] notin l then 
+								Append(~l, [e12, e14, e13, r, t, s]);	
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12, e14, e13, r, t, s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12, e14, e13, r, t, s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12, e14, e13, r, t, s));
+							end if;
+							if [e13, e12, e14, s, r, t] notin l then
+								Append(~l, [e13, e12, e14, s, r, t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13, e12, e14, s, r, t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13, e12, e14, s, r, t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13, e12, e14, s, r, t));
+							end if;
+							if [e13, e14, e12, s, t, r] notin l then
+								Append(~l, [e13, e14, e12, s, t, r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13, e14, e12, s, t, r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13, e14, e12, s, t, r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13, e14, e12, s, t, r));
+							end if;
+							if [e14, e12, e13, t, r, s] notin l then
+								Append(~l, [e14, e12, e13, t, r, s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14, e12, e13, t, r, s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14, e12, e13, t, r, s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14, e12, e13, t, r, s));
+							end if;
+							if [e14, e13, e12, t, s, r] notin l then
+								Append(~l, [e14, e13, e12, t, s, r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14, e13, e12, t, s, r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14, e13, e12, t, s, r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14, e13, e12, t, s, r));
+							end if;	
+							if [e12 + s + t, e13 + t, e14 + s, r, -s, -t] notin l then
+								Append(~l, [e12 + s + t, e13 + t, e14 + s, r, -s, -t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12 + s + t, e13 + t, e14 + s, r, -s, -t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12 + s + t, e13 + t, e14 + s, r, -s, -t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12 + s + t, e13 + t, e14 + s, r, -s, -t));
+							end if;	
+							if [e12 + s + t, e14 + s, e13 + t, r, -t, -s] notin l then
+								Append(~l, [e12 + s + t, e14 + s, e13 + t, r, -t, -s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12 + s + t, e14 + s, e13 + t, r, -t, -s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12 + s + t, e14 + s, e13 + t, r, -t, -s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12 + s + t, e14 + s, e13 + t, r, -t, -s));
+							end if;	
+							if [e13 + t, e12 + s + t, e14 + s, -s, r, -t] notin l then
+								Append(~l, [e13 + t, e12 + s + t, e14 + s, -s, r, -t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13 + t, e12 + s + t, e14 + s, -s, r, -t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13 + t, e12 + s + t, e14 + s, -s, r, -t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13 + t, e12 + s + t, e14 + s, -s, r, -t));
+							end if;	
+							if [e13 + t, e14 + s, e12 + s + t, -s, -t, r] notin l then
+								Append(~l, [e13 + t, e14 + s, e12 + s + t, -s, -t, r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13 + t, e14 + s, e12 + s + t, -s, -t, r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13 + t, e14 + s, e12 + s + t, -s, -t, r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13 + t, e14 + s, e12 + s + t, -s, -t, r));
+							end if;	
+							if [e14 + s, e12 + s + t, e13 + t, -t, r, -s] notin l then
+								Append(~l, [e14 + s, e12 + s + t, e13 + t, -t, r, -s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14 + s, e12 + s + t, e13 + t, -t, r, -s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14 + s, e12 + s + t, e13 + t, -t, r, -s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14 + s, e12 + s + t, e13 + t, -t, r, -s));
+							end if;	
+							if [e14 + s, e13 + t, e12 + s + t, -t, -s, r] notin l then
+								Append(~l, [e14 + s, e13 + t, e12 + s + t, -t, -s, r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14 + s, e13 + t, e12 + s + t, -t, -s, r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14 + s, e13 + t, e12 + s + t, -t, -s, r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14 + s, e13 + t, e12 + s + t, -t, -s, r));
+							end if;
+							if [e12 + t, e13 + r + t, e14 + r, -r, s, -t] notin l then
+								Append(~l, [e12 + t, e13 + r + t, e14 + r, -r, s, -t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12 + t, e13 + r + t, e14 + r, -r, s, -t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12 + t, e13 + r + t, e14 + r, -r, s, -t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12 + t, e13 + r + t, e14 + r, -r, s, -t));
+							end if;
+							if [e12 + t, e14 + r, e13 + r + t, -r, -t, s] notin l then
+								Append(~l, [e12 + t, e14 + r, e13 + r + t, -r, -t, s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12 + t, e14 + r, e13 + r + t, -r, -t, s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12 + t, e14 + r, e13 + r + t, -r, -t, s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12 + t, e14 + r, e13 + r + t, -r, -t, s));
+							end if;
+							if [e13 + r + t, e12 + t, e14 + r, s, -r, -t] notin l then
+								Append(~l, [e13 + r + t, e12 + t, e14 + r, s, -r, -t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13 + r + t, e12 + t, e14 + r, s, -r, -t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13 + r + t, e12 + t, e14 + r, s, -r, -t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13 + r + t, e12 + t, e14 + r, s, -r, -t));
+							end if;
+							if [e13 + r + t, e14 + r, e12 + t, s, -t, -r] notin l then
+								Append(~l, [e13 + r + t, e14 + r, e12 + t, s, -t, -r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13 + r + t, e14 + r, e12 + t, s, -t, -r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13 + r + t, e14 + r, e12 + t, s, -t, -r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13 + r + t, e14 + r, e12 + t, s, -t, -r));
+							end if;
+							if [e14 + r, e12 + t, e13 + r + t, -t, -r, s] notin l then
+								Append(~l, [e14 + r, e12 + t, e13 + r + t, -t, -r, s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14 + r, e12 + t, e13 + r + t, -t, -r, s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14 + r, e12 + t, e13 + r + t, -t, -r, s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14 + r, e12 + t, e13 + r + t, -t, -r, s));
+							end if;
+							if [e14 + r, e13 + r + t, e12 + t, -t, s, -r] notin l then
+								Append(~l, [e14 + r, e13 + r + t, e12 + t, -t, s, -r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14 + r, e13 + r + t, e12 + t, -t, s, -r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14 + r, e13 + r + t, e12 + t, -t, s, -r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14 + r, e13 + r + t, e12 + t, -t, s, -r));
+							end if;
+							if [e12 + s, e13 + r, e14 + r + s, -r, -s, t] notin l then
+								Append(~l, [e12 + s, e13 + r, e14 + r + s, -r, -s, t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12 + s, e13 + r, e14 + r + s, -r, -s, t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12 + s, e13 + r, e14 + r + s, -r, -s, t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12 + s, e13 + r, e14 + r + s, -r, -s, t));
+							end if;
+							if [e12 + s, e14 + r + s, e13 + r, -r, t, -s] notin l then
+								Append(~l, [e12 + s, e14 + r + s, e13 + r, -r, t, -s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12 + s, e14 + r + s, e13 + r, -r, t, -s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12 + s, e14 + r + s, e13 + r, -r, t, -s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12 + s, e14 + r + s, e13 + r, -r, t, -s));
+							end if;
+							if [e13 + r, e12 + s, e14 + r + s, -s, -r, t] notin l then
+								Append(~l, [e13 + r, e12 + s, e14 + r + s, -s, -r, t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13 + r, e12 + s, e14 + r + s, -s, -r, t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13 + r, e12 + s, e14 + r + s, -s, -r, t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13 + r, e12 + s, e14 + r + s, -s, -r, t));
+							end if;
+							if [e13 + r, e14 + r + s, e12 + s, -s, t, -r] notin l then
+								Append(~l, [e13 + r, e14 + r + s, e12 + s, -s, t, -r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13 + r, e14 + r + s, e12 + s, -s, t, -r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13 + r, e14 + r + s, e12 + s, -s, t, -r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13 + r, e14 + r + s, e12 + s, -s, t, -r));
+							end if;
+							if [e14 + r + s, e12 + s, e13 + r, t, -r, -s] notin l then
+								Append(~l, [e14 + r + s, e12 + s, e13 + r, t, -r, -s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14 + r + s, e12 + s, e13 + r, t, -r, -s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14 + r + s, e12 + s, e13 + r, t, -r, -s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14 + r + s, e12 + s, e13 + r, t, -r, -s));
+							end if;
+							if [e14 + r + s, e13 + r, e12 + s, t, -s, -r] notin l then
+								Append(~l, [e14 + r + s, e13 + r, e12 + s, t, -s, -r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14 + r + s, e13 + r, e12 + s, t, -s, -r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14 + r + s, e13 + r, e12 + s, t, -s, -r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14 + r + s, e13 + r, e12 + s, t, -s, -r));
+							end if;
+							if [e12 + s + t, e13 + r + t, e14 + r + s, -r, -s, -t] notin l then
+								Append(~l, [e12 + s + t, e13 + r + t, e14 + r + s, -r, -s, -t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12 + s + t, e13 + r + t, e14 + r + s, -r, -s, -t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12 + s + t, e13 + r + t, e14 + r + s, -r, -s, -t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12 + s + t, e13 + r + t, e14 + r + s, -r, -s, -t));
+							end if;
+							if [e12 + s + t, e14 + r + s, e13 + r + t, -r, -t, -s] notin l then
+								Append(~l, [e12 + s + t, e14 + r + s, e13 + r + t, -r, -t, -s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12 + s + t, e14 + r + s, e13 + r + t, -r, -t, -s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12 + s + t, e14 + r + s, e13 + r + t, -r, -t, -s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12 + s + t, e14 + r + s, e13 + r + t, -r, -t, -s));
+							end if;
+							if [e13 + r + t, e12 + t + s, e14 + r + s, -s, -r, -t] notin l then
+								Append(~l, [e13 + r + t, e12 + t + s, e14 + r + s, -s, -r, -t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13 + r + t, e12 + t + s, e14 + r + s, -s, -r, -t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13 + r + t, e12 + t + s, e14 + r + s, -s, -r, -t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13 + r + t, e12 + t + s, e14 + r + s, -s, -r, -t));
+							end if;
+							if [e13 + r + t, e14 + r + s, e12 + t + s, -s, -t, -r] notin l then
+								Append(~l, [e13 + r + t, e14 + r + s, e12 + t + s, -s, -t, -r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13 + r + t, e14 + r + s, e12 + t + s, -s, -t, -r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13 + r + t, e14 + r + s, e12 + t + s, -s, -t, -r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13 + r + t, e14 + r + s, e12 + t + s, -s, -t, -r));
+							end if;
+							if [e14 + r + s, e12 + t + s, e13 + r + t, -t, -r, -s] notin l then
+								Append(~l, [e14 + r + s, e12 + t + s, e13 + r + t, -t, -r, -s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14 + r + s, e12 + t + s, e13 + r + t, -t, -r, -s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14 + r + s, e12 + t + s, e13 + r + t, -t, -r, -s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14 + r + s, e12 + t + s, e13 + r + t, -t, -r, -s));
+							end if;
+							if [e14 + r + s, e13 + r + t, e12 + s + t, -t, -s, -r] notin l then
+								Append(~l, [e14 + r + s, e13 + r + t, e12 + s + t, -t, -s, -r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14 + r + s, e13 + r + t, e12 + s + t, -t, -s, -r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14 + r + s, e13 + r + t, e12 + s + t, -t, -s, -r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14 + r + s, e13 + r + t, e12 + s + t, -t, -s, -r));
+							end if;
+							if [e12, e13 + r, e14 + r, -r, s, t] notin l then
+								Append(~l, [e12, e13 + r, e14 + r, -r, s, t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12, e13 + r, e14 + r, -r, s, t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12, e13 + r, e14 + r, -r, s, t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12, e13 + r, e14 + r, -r, s, t));
+							end if;
+							if [e12, e14 + r, e13 + r, -r, t, s] notin l then
+								Append(~l, [e12, e14 + r, e13 + r, -r, t, s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12, e14 + r, e13 + r, -r, t, s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12, e14 + r, e13 + r, -r, t, s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12, e14 + r, e13 + r, -r, t, s));
+							end if;
+							if [e13 + r, e12, e14 + r, s, -r, t] notin l then
+								Append(~l, [e13 + r, e12, e14 + r, s, -r, t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13 + r, e12, e14 + r, s, -r, t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13 + r, e12, e14 + r, s, -r, t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13 + r, e12, e14 + r, s, -r, t));
+							end if;
+							if [e13 + r, e14 + r, e12, s, t, -r] notin l then
+								Append(~l, [e13 + r, e14 + r, e12, s, t, -r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13 + r, e14 + r, e12, s, t, -r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13 + r, e14 + r, e12, s, t, -r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13 + r, e14 + r, e12, s, t, -r));
+							end if;
+							if [e14 + r, e12, e13 + r, t, -r, s] notin l then
+								Append(~l, [e14 + r, e12, e13 + r, t, -r, s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14 + r, e12, e13 + r, t, -r, s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14 + r, e12, e13 + r, t, -r, s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14 + r, e12, e13 + r, t, -r, s));
+							end if;
+							if [e14 + r, e13 + r, e12, t, s, -r] notin l then
+								Append(~l, [e14 + r, e13 + r, e12, t, s, -r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14 + r, e13 + r, e12, t, s, -r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14 + r, e13 + r, e12, t, s, -r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14 + r, e13 + r, e12, t, s, -r));
+							end if;
+							if [e12 + s, e13, e14 + s, r, -s, t] notin l then
+								Append(~l, [e12 + s, e13, e14 + s, r, -s, t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12 + s, e13, e14 + s, r, -s, t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12 + s, e13, e14 + s, r, -s, t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12 + s, e13, e14 + s, r, -s, t));
+							end if;
+							if [e12 + s, e14 + s, e13, r, t, -s] notin l then
+								Append(~l, [e12 + s, e14 + s, e13, r, t, -s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12 + s, e14 + s, e13, r, t, -s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12 + s, e14 + s, e13, r, t, -s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12 + s, e14 + s, e13, r, t, -s));
+							end if;
+							if [e13, e12 + s, e14 + s, -s, r, t] notin l then
+								Append(~l, [e13, e12 + s, e14 + s, -s, r, t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13, e12 + s, e14 + s, -s, r, t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13, e12 + s, e14 + s, -s, r, t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13, e12 + s, e14 + s, -s, r, t));
+							end if;
+							if [e13, e14 + s, e12 + s, -s, t, r] notin l then
+								Append(~l, [e13, e14 + s, e12 + s, -s, t, r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13, e14 + s, e12 + s, -s, t, r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13, e14 + s, e12 + s, -s, t, r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13, e14 + s, e12 + s, -s, t, r));
+							end if;
+							if [e14 + s, e12 + s, e13, t, r, -s] notin l then
+								Append(~l, [e14 + s, e12 + s, e13, t, r, -s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14 + s, e12 + s, e13, t, r, -s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14 + s, e12 + s, e13, t, r, -s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14 + s, e12 + s, e13, t, r, -s));
+							end if;
+							if [e14 + s, e13, e12 + s, t, -s, r] notin l then
+								Append(~l, [e14 + s, e13, e12 + s, t, -s, r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14 + s, e13, e12 + s, t, -s, r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14 + s, e13, e12 + s, t, -s, r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14 + s, e13, e12 + s, t, -s, r));
+							end if;
+							if [e12 + t, e13 + t, e14, r, s, -t] notin l then
+								Append(~l, [e12 + t, e13 + t, e14, r, s, -t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12 + t, e13 + t, e14, r, s, -t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12 + t, e13 + t, e14, r, s, -t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12 + t, e13 + t, e14, r, s, -t));
+							end if;
+							if [e12 + t, e14, e13 + t, r, -t, s] notin l then
+								Append(~l, [e12 + t, e14, e13 + t, r, -t, s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e12 + t, e14, e13 + t, r, -t, s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e12 + t, e14, e13 + t, r, -t, s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e12 + t, e14, e13 + t, r, -t, s));
+							end if;
+							if [e13 + t, e12 + t, e14, s, r, -t] notin l then
+								Append(~l, [e13 + t, e12 + t, e14, s, r, -t]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13 + t, e12 + t, e14, s, r, -t]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13 + t, e12 + t, e14, s, r, -t));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13 + t, e12 + t, e14, s, r, -t));
+							end if;
+							if [e13 + t, e14, e12 + t, s, -t, r] notin l then
+								Append(~l, [e13 + t, e14, e12 + t, s, -t, r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e13 + t, e14, e12 + t, s, -t, r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e13 + t, e14, e12 + t, s, -t, r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e13 + t, e14, e12 + t, s, -t, r));
+							end if;
+							if [e14, e12 + t, e13 + t, -t, r, s] notin l then
+								Append(~l, [e14, e12 + t, e13 + t, -t, r, s]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14, e12 + t, e13 + t, -t, r, s]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14, e12 + t, e13 + t, -t, r, s));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14, e12 + t, e13 + t, -t, r, s));
+							end if;
+							if [e14, e13 + t, e12 + t, -t, s, r] notin l then
+								Append(~l, [e14, e13 + t, e12 + t, -t, s, r]);
+								count := count + 1;
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "count: ");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", count);
+
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "HW:");
+								PrintFile(IntegerToString(weight) cat "_Para.txt", HW(eM(e12, e13, e14, r, s, t)));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", [e14, e13 + t, e12 + t, -t, s, r]);
+								PrintFile(IntegerToString(weight) cat "_Para.txt", eM(e14, e13 + t, e12 + t, -t, s, r));
+								PrintFile(IntegerToString(weight) cat "_Para.txt", "\n\n");
+							
+								PrintFile(IntegerToString(weight) cat ".txt", "\n");
+								PrintFile(IntegerToString(weight) cat ".txt", "32 32");
+								PrintFile(IntegerToString(weight) cat ".txt", eM(e14, e13 + t, e12 + t, -t, s, r));
+							end if;
+							//l := [];
+							//weight := weight + 1;
+						end if;
+					end for;
+				end for;
+			end for;
+		end for;
+	end for;
+end for;
+
+
+PrintFile(IntegerToString(weight) cat ".txt", count);
+return true;
+end function;
